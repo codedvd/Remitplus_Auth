@@ -11,7 +11,7 @@ namespace Remitplus_Authentication.Model
         public bool IsValid { get; set; }
         public bool IsDeleted { get; set; }
         public DateTime CreateAt { get; set; } = DateTime.UtcNow;
-        public DateTime RevokedAt { get; set; }
+        public DateTime? RevokedAt { get; set; } = null;
         public DateTime ExpiryDate { get; set; }
         public string CreatedById { get; set; } = string.Empty;
         // Navigation property

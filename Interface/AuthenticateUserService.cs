@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Remitplus_Accessbank_Service.Helper;
 using Remitplus_Authentication.Context;
 using Remitplus_Authentication.Helper;
 using Remitplus_Authentication.Model;
@@ -24,7 +23,7 @@ namespace Remitplus_Authentication.Interface
         public async Task<ApiResponse> CreateANewUser(OnboardUserReqDto userReqDto)
         {
             // check if email already exists
-            var user = await _context.ApplicationUsers.FindAsync(userReqDto.Email);
+            var user = await _context.Users.FirstOrDefaultAsync(e => e.Email.Equals(userReqDto.Email));
             if (user != null)
                 return ApiResponse.Failed("Email already registered.");
 
@@ -37,8 +36,8 @@ namespace Remitplus_Authentication.Interface
                 CreatedAt = DateTime.UtcNow,
                 LastLoginAt = DateTime.MinValue
             };
-
-            _context.ApplicationUsers.Add(newUser);
+            
+            _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
 
             return ApiResponse.Success("User created successfully", newUser);
@@ -46,7 +45,7 @@ namespace Remitplus_Authentication.Interface
 
         public async Task<ApiResponse> ForgetPasswordOperation(ForgetPassReqDto forgetPassReq)
         {
-            var user = await _context.ApplicationUsers.FirstOrDefaultAsync(u => u.Email == forgetPassReq.Email);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == forgetPassReq.Email);
             if (user == null)
                 return ApiResponse.Failed("No account found with this email.");
 
@@ -56,7 +55,7 @@ namespace Remitplus_Authentication.Interface
 
         public async Task<ApiResponse> LoginRegisteredUserlo(LoginReqDto loginReq)
         {
-            var user = await _context.ApplicationUsers.FirstOrDefaultAsync(u => u.Email == loginReq.Email);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginReq.Email);
             if (user == null)
                 return ApiResponse.Failed("Invalid email or password.");
 
@@ -77,7 +76,7 @@ namespace Remitplus_Authentication.Interface
 
         public async Task<ApiResponse> ResetPasswordOperation(ResetPasswordReqDto resetPassword)
         {
-            var user = await _context.ApplicationUsers.FirstOrDefaultAsync(u => u.Email == resetPassword.Email);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == resetPassword.Email);
             if (user == null)
                 return ApiResponse.Failed("No account found with this email.");
 
@@ -85,7 +84,7 @@ namespace Remitplus_Authentication.Interface
                 return ApiResponse.Failed("Password Supplied is Incorrect");
 
             user.PasswordHash = _encrypt.AESEncryptData(resetPassword.Password);
-            _context.ApplicationUsers.Update(user);
+            _context.Users.Update(user);
 
             await _context.SaveChangesAsync();
 

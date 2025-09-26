@@ -10,11 +10,18 @@ namespace Remitplus_Authentication.Controllers
     {
         private readonly IApiKeysGeneratorService _apiKeysGenerator = apiKeysGenerator;
 
-        [HttpPost("GenerateFreshKey")]
+        [HttpPost("generate-fresh-key")]
         public async Task<IActionResult> GenerateNewApi(GenerateKeysReqDto generateKeys)
         {
             var generate = await _apiKeysGenerator.GenerateApiKeysOperation(generateKeys);
             return Ok(generate);
+        }
+
+        [HttpGet("get-api-key")]
+        public async Task<IActionResult> GetUserApiKey()
+        {
+            var getkeys = await _apiKeysGenerator.GetUserApiKeyOperation();
+            return Ok(getkeys);
         }
     }
 }

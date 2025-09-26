@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Remitplus_Authentication.Context;
@@ -11,9 +12,11 @@ using Remitplus_Authentication.Context;
 namespace Remitplus_Authentication.Migrations
 {
     [DbContext(typeof(RemitPlusDbContext))]
-    partial class RemitPlusDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250926050956_Init4")]
+    partial class Init4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

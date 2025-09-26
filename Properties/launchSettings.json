@@ -16,9 +16,9 @@
       "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "Audience": "RemitPlusUsers",
-        "SecretKey": "71935ee86ec3ec4c6e44616fa220af3d42af4e386b443363042e194b45f7c2d4",
-        "Issuer": "RemitPlus"
+        "XApiKey": "xQn3viEzqYQUR!FsD47ybjlcno5=O4a3lPIVRgxzTSYAu3cbT4/TcJI267FxoKho",
+        "Encryption:Key": "9rF!sY7uQ#Lp8vK@tWx2BZ5dM1eH0C3N",
+        "Encryption:Iv": "G7vL!p2@Nk#3Bt9Z"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7160;http://localhost:5173"

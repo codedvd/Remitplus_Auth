@@ -22,7 +22,7 @@ namespace Remitplus_Authentication.Interface
 
         public async Task<ApiResponse> BlacklistOperation(BlacklistIPReqDto reqDto)
         {
-            var user = await _context.ApplicationUsers.FirstOrDefaultAsync(u => u.Email.Equals(reqDto.Email, StringComparison.CurrentCultureIgnoreCase));
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower().Equals(reqDto.Email.ToLower()));
             if (user == null)
                 return ApiResponse.Failed("User Not found");
 
@@ -77,7 +77,7 @@ namespace Remitplus_Authentication.Interface
 
         public async Task<ApiResponse> GetWhitelistedIPsOperation(string email)
         {
-            var user = await _context.ApplicationUsers.FirstOrDefaultAsync(u => u.Email == email);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user == null)
                 return ApiResponse.Failed("User not found.");
 
@@ -95,7 +95,7 @@ namespace Remitplus_Authentication.Interface
 
         public async Task<ApiResponse> RemoveWhitelistOperation(WhitelistIpReqDto reqDto)
         {
-            var user = await _context.ApplicationUsers.FirstOrDefaultAsync(u => u.Email == reqDto.Email);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == reqDto.Email);
             if (user == null)
                 return ApiResponse.Failed("User not found.");
 
@@ -121,7 +121,7 @@ namespace Remitplus_Authentication.Interface
 
         public async Task<ApiResponse> WhitelistOperation(WhitelistIpReqDto reqDto)
         {
-            var user = await _context.ApplicationUsers.FirstOrDefaultAsync(u => u.Email == reqDto.Email);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == reqDto.Email);
             if (user == null)
                 return ApiResponse.Failed("User not found.");
 
@@ -129,27 +129,32 @@ namespace Remitplus_Authentication.Interface
                 .FirstOrDefaultAsync(x => x.ApplicationUserId == user.UserId && x.IsActive);
 
             List<string> updatedIds = [];
-            if(exists != null)
+            switch(exists is not null)
             {
-                var ips = exists?.IpAddress.Split(',').Distinct().ToList();
-                updatedIds.AddRange(ips != null ? ips.Concat(reqDto.IpAddress) : reqDto.IpAddress);
+                case true:
+                    var deserial = JsonSerializer.Deserialize<List<string>>(exists.IpAddress);
+                    updatedIds.AddRange(deserial?.Count > 0 ? deserial.Concat(reqDto.IpAddress) : reqDto.IpAddress);
+
+                    exists.UpdatedAt = DateTime.UtcNow;
+                    exists.IpAddress = JsonSerializer.Serialize(updatedIds.Distinct());
+                    _context.IpWhitelists.Update(exists);
+                    break;
+                case false:
+                    var entry = new ApplicationUserIpWhitelist
+                    {
+                        Id = Guid.NewGuid(),
+                        ApplicationUserId = user.UserId,
+                        IpAddress = JsonSerializer.Serialize(reqDto.IpAddress),
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow,
+                        CreatedById = "SYSTEM"
+                    };
+                    _context.IpWhitelists.Add(entry);
+                    break;
             }
-
-            var entry = new ApplicationUserIpWhitelist
-            {
-                Id = Guid.NewGuid(),
-                ApplicationUserId = user.UserId,
-                IpAddress = JsonSerializer.Serialize(updatedIds),
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow,
-                ExpiryDate = DateTime.UtcNow.AddDays(30).AddMinutes(-1),
-                CreatedById = "SYSTEM"
-            };
-
-            _context.IpWhitelists.Add(entry);
             await _context.SaveChangesAsync();
 
-            return ApiResponse.Success("IP whitelisted successfully", entry);
+            return ApiResponse.Success("IP whitelisted successfully");
         }
     }
 }

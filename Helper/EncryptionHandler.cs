@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace Remitplus_Accessbank_Service.Helper;
+namespace Remitplus_Authentication.Helper;
 public interface IEncryptionHandler
 {
     string AESDecryptData(string encryptedString);

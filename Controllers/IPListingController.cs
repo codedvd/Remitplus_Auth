@@ -36,7 +36,7 @@ namespace Remitplus_Authentication.Controllers
         public async Task<ActionResult<ApiResponse>> RemoveWhitelistedIp(WhitelistIpReqDto reqDto)
         {
             var removewhitelist = await _ipService.RemoveWhitelistOperation(reqDto);
-            return Ok();
+            return Ok(removewhitelist);
         }
 
         [HttpGet("get-whitelisted-ips")]

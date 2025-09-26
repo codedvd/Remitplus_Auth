@@ -21,7 +21,7 @@ namespace Remitplus_Authentication.Controllers
         public async Task<IActionResult> LoginUser(LoginReqDto loginReq)
         {
             ApiResponse login = await _authenticate.LoginRegisteredUserlo(loginReq);
-            return Ok(loginReq);
+            return Ok(login);
         }
 
         [HttpPost("reset-password")]
