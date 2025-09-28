@@ -1,8 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Remitplus_Authentication.Context;
 using Remitplus_Authentication.Helper;
-using Remitplus_Authentication.Model;
-using Remitplus_Authentication.Model.Dtos;
+using Remitplus_Authentication.Models;
+using Remitplus_Authentication.Models.Dtos;
 
 namespace Remitplus_Authentication.Interface
 {
@@ -14,9 +13,9 @@ namespace Remitplus_Authentication.Interface
         Task<ApiResponse> ResetPasswordOperation(ResetPasswordReqDto resetPassword);
     }
 
-    public class AuthenticateUserService(RemitPlusDbContext context, IEncryptionHandler encrypt, IJwtService jwtService) : IAuthenticateUserService
+    public class AuthenticateUserService(RemitplusDatabaseContext context, IEncryptionHandler encrypt, IJwtService jwtService) : IAuthenticateUserService
     {
-        private readonly RemitPlusDbContext _context = context;
+        private readonly RemitplusDatabaseContext _context = context;
         private readonly IEncryptionHandler _encrypt = encrypt;
         private readonly IJwtService _jwtService = jwtService;
 
@@ -27,14 +26,16 @@ namespace Remitplus_Authentication.Interface
             if (user != null)
                 return ApiResponse.Failed("Email already registered.");
 
-            var newUser = new ApplicationUser
+            var newUser = new User
             {
                 FullName = userReqDto.FullName,
                 Email = userReqDto.Email,
                 PasswordHash = _encrypt.AESEncryptData(userReqDto.Password),
                 PhoneNumber = userReqDto.PhoneNumber,
                 CreatedAt = DateTime.UtcNow,
-                LastLoginAt = DateTime.MinValue
+                LastLoginAt = DateTime.MinValue,
+                UserId = Guid.NewGuid(),
+                IsActive = true,
             };
             
             _context.Users.Add(newUser);

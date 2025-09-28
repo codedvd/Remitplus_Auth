@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Remitplus_Authentication.Model.Dtos;
+using Remitplus_Authentication.Models.Dtos;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 

@@ -1,8 +1,6 @@
-﻿
-using Microsoft.EntityFrameworkCore;
-using Remitplus_Authentication.Context;
-using Remitplus_Authentication.Model;
-using Remitplus_Authentication.Model.Dtos;
+﻿using Microsoft.EntityFrameworkCore;
+using Remitplus_Authentication.Models;
+using Remitplus_Authentication.Models.Dtos;
 using System.Text.Json;
 
 namespace Remitplus_Authentication.Interface
@@ -16,9 +14,9 @@ namespace Remitplus_Authentication.Interface
         Task<ApiResponse> WhitelistOperation(WhitelistIpReqDto reqDto);
     }
 
-    public class IPService(RemitPlusDbContext context) : IIPService
+    public class IPService(RemitplusDatabaseContext context) : IIPService
     {
-        private readonly RemitPlusDbContext _context = context;
+        private readonly RemitplusDatabaseContext _context = context;
 
         public async Task<ApiResponse> BlacklistOperation(BlacklistIPReqDto reqDto)
         {
@@ -26,17 +24,17 @@ namespace Remitplus_Authentication.Interface
             if (user == null)
                 return ApiResponse.Failed("User Not found");
 
-            var entry = await _context.IPBlackLists
-            .FirstOrDefaultAsync(x => x.IPAddress == reqDto.IpAddress);
+            var entry = await _context.IpblackLists
+            .FirstOrDefaultAsync(x => x.Ipaddress == reqDto.IpAddress);
 
             if (entry == null)
             {
-                entry = new IPBlackList
+                entry = new IpblackList
                 {
                     Id = Guid.NewGuid(),
-                    IPAddress = reqDto.IpAddress
+                    Ipaddress = reqDto.IpAddress
                 };
-                _context.IPBlackLists.Add(entry);
+                _context.IpblackLists.Add(entry);
             }
             else
             {
@@ -50,7 +48,7 @@ namespace Remitplus_Authentication.Interface
 
         public async Task<ApiResponse> GetIPLogsOperation(int? pageSize, int? pageNumber, string IpAddress)
         {
-            var ipOperations = await _context.WhitelistedIpLog.Where(u => u.IpAddress == IpAddress).ToListAsync();
+            var ipOperations = await _context.WhitelistedIpLogs.Where(u => u.IpAddress == IpAddress).ToListAsync();
             if (!ipOperations.Any())
                 return ApiResponse.Failed("No whitelist entries found.");
 
@@ -140,7 +138,7 @@ namespace Remitplus_Authentication.Interface
                     _context.IpWhitelists.Update(exists);
                     break;
                 case false:
-                    var entry = new ApplicationUserIpWhitelist
+                    var entry = new IpWhitelist
                     {
                         Id = Guid.NewGuid(),
                         ApplicationUserId = user.UserId,

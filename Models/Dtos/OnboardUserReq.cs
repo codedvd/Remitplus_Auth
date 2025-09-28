@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace Remitplus_Authentication.Model.Dtos;
+namespace Remitplus_Authentication.Models.Dtos;
 
 public class OnboardUserReqDto
 {

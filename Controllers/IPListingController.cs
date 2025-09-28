@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Remitplus_Authentication.Interface;
-using Remitplus_Authentication.Model.Dtos;
+using Remitplus_Authentication.Models.Dtos;
 using System.Threading.Tasks;
 
 namespace Remitplus_Authentication.Controllers

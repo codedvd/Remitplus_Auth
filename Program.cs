@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Remitplus_Authentication.Context;
 using Remitplus_Authentication.Helper;
 using Remitplus_Authentication.Interface;
 using Remitplus_Authentication.Middlewares;
-using Remitplus_Authentication.Model.Dtos;
+using Remitplus_Authentication.Models;
+using Remitplus_Authentication.Models.Dtos;
 using Remitplus_Authentication.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -66,7 +66,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-builder.Services.AddDbContext<RemitPlusDbContext>(options =>
+builder.Services.AddDbContext<RemitplusDatabaseContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConntion"));
 });
@@ -75,23 +75,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<RemitPlusDbContext>();
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-    try
-    {
-        logger.LogInformation("Applying database migrations...");
-        db.Database.Migrate();
-        logger.LogInformation("Migrations applied successfully.");
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Failed to apply database migrations.");
-        throw;
-    }
-}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

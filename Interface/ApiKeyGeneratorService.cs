@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Remitplus_Accessbank_Service.Helper;
-using Remitplus_Authentication.Context;
 using Remitplus_Authentication.Helper;
-using Remitplus_Authentication.Model;
-using Remitplus_Authentication.Model.Dtos;
+using Remitplus_Authentication.Models;
+using Remitplus_Authentication.Models.Dtos;
 
 namespace Remitplus_Authentication.Interface
 {
@@ -13,9 +12,9 @@ namespace Remitplus_Authentication.Interface
         Task<ApiResponse> GetUserApiKeyOperation();
     }
 
-    public class ApiKeyGeneratorService(RemitPlusDbContext context, IEncryptionHandler encrypt, IConfiguration config) : IApiKeysGeneratorService
+    public class ApiKeyGeneratorService(RemitplusDatabaseContext context, IEncryptionHandler encrypt, IConfiguration config) : IApiKeysGeneratorService
     {
-        private readonly RemitPlusDbContext _context = context;
+        private readonly RemitplusDatabaseContext _context = context;
         private readonly IEncryptionHandler _encrypt = encrypt;
         private readonly IConfiguration _config = config;
 
@@ -25,7 +24,7 @@ namespace Remitplus_Authentication.Interface
             if (user == null)
                 return ApiResponse.Failed("Invalid user.");
             var existingKey = await _context.UserApiKeys
-                .FirstOrDefaultAsync(k => k.ApplicationUserId == user.UserId.ToString());
+                .FirstOrDefaultAsync(k => k.ApplicationUserId == user.UserId);
 
             switch (existingKey != null)
             {
@@ -40,9 +39,9 @@ namespace Remitplus_Authentication.Interface
                     _context.UserApiKeys.Update(existingKey);
                     break;
                 case false:
-                    var apiKey = new ApplicationUserApiKeys
+                    var apiKey = new UserApiKey
                     {
-                        ApplicationUserId = user.UserId.ToString(),
+                        ApplicationUserId = user.UserId,
                         ApiKeyHash = _encrypt.AESEncryptData(ApiKeyHelper.GenerateApiKey()),
                         IsValid = true,
                         IsDeleted = false,
@@ -67,7 +66,7 @@ namespace Remitplus_Authentication.Interface
                 return Task.FromResult(ApiResponse.Failed("Invalid user."));
 
             var apiKeys = _context.UserApiKeys
-                .FirstOrDefault(k => k.ApplicationUserId == user.UserId.ToString() && !k.IsDeleted);
+                .FirstOrDefault(k => k.ApplicationUserId == user.UserId && !k.IsDeleted);
 
             if (apiKeys == null)
                 return Task.FromResult(ApiResponse.Failed("No API key found for this user."));
