@@ -15,6 +15,8 @@ public partial class RemitplusDatabaseContext : DbContext
     {
     }
 
+    public virtual DbSet<ApplicationUserRole> ApplicationUserRoles { get; set; }
+
     public virtual DbSet<FailedRequest> FailedRequests { get; set; }
 
     public virtual DbSet<IpWhitelist> IpWhitelists { get; set; }
@@ -35,6 +37,14 @@ public partial class RemitplusDatabaseContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<ApplicationUserRole>(entity =>
+        {
+            entity.HasKey(e => e.RoleId).HasName("ApplicationUserRoles_pkey");
+
+            entity.Property(e => e.RoleId).HasDefaultValueSql("gen_random_uuid()");
+            entity.Property(e => e.CreatedDate).HasDefaultValueSql("now()");
+        });
+
         modelBuilder.Entity<FailedRequest>(entity =>
         {
             entity.HasKey(e => e.FailId);

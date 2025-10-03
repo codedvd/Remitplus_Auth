@@ -23,6 +23,8 @@ public partial class User
 
     public DateTime LastLoginAt { get; set; }
 
+    public string? Status { get; set; }
+
     public virtual ICollection<IpWhitelist> IpWhitelists { get; set; } = new List<IpWhitelist>();
 
     public virtual ICollection<UserApiKey> UserApiKeys { get; set; } = new List<UserApiKey>();

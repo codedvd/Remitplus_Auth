@@ -73,7 +73,7 @@ namespace Remitplus_Authentication.Interface
 
             return Task.FromResult(ApiResponse.Success("API key retrieved successfully", new
             {
-                ApiKey = apiKeys.ApiKeyHash,
+                ApiKey = _encrypt.AESDecryptData(apiKeys.ApiKeyHash),
                 Expiry = apiKeys.ExpiryDate
             }));
         }

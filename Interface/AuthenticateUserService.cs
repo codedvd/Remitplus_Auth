@@ -9,6 +9,7 @@ namespace Remitplus_Authentication.Interface
     {
         Task<ApiResponse> CreateANewUser(OnboardUserReqDto userReqDto);
         Task<ApiResponse> ForgetPasswordOperation(ForgetPassReqDto forgetPassReq);
+        Task<ApiResponse> GetAllUser();
         Task<ApiResponse> LoginRegisteredUserlo(LoginReqDto loginReq);
         Task<ApiResponse> ResetPasswordOperation(ResetPasswordReqDto resetPassword);
     }
@@ -25,7 +26,7 @@ namespace Remitplus_Authentication.Interface
             var user = await _context.Users.FirstOrDefaultAsync(e => e.Email.Equals(userReqDto.Email));
             if (user != null)
                 return ApiResponse.Failed("Email already registered.");
-
+           
             var newUser = new User
             {
                 FullName = userReqDto.FullName,
@@ -36,9 +37,19 @@ namespace Remitplus_Authentication.Interface
                 LastLoginAt = DateTime.MinValue,
                 UserId = Guid.NewGuid(),
                 IsActive = true,
+                Status = Status.Pending.ToString(),
             };
             
             _context.Users.Add(newUser);
+            await _context.ApplicationUserRoles.AddAsync(new ApplicationUserRole
+            {
+                RoleId = Guid.NewGuid(),
+                CreatedDate = DateTime.UtcNow,
+                ApllicationUserId = newUser.UserId,
+                RoleName = userReqDto.Role,
+                RoleDescription = "User Role"
+            });
+
             await _context.SaveChangesAsync();
 
             return ApiResponse.Success("User created successfully", newUser);
@@ -54,6 +65,25 @@ namespace Remitplus_Authentication.Interface
             return ApiResponse.Success("Password reset link sent to your email.");
         }
 
+        public Task<ApiResponse> GetAllUser()
+        {
+            var results = from u in _context.Users
+                          join r in _context.ApplicationUserRoles on u.UserId equals r.ApllicationUserId
+                          select new
+                          {
+                              UserId = u.UserId,
+                              Fullname = u.FullName,
+                              Email = u.Email,
+                              PhoneNumber = u.PhoneNumber,
+                              IsActive = u.IsActive,
+                              CreatedAt = u.CreatedAt,
+                              LastLoginAt = u.LastLoginAt,
+                              Status = u.Status,
+                              Role = r.RoleName
+                          };
+            return Task.FromResult(ApiResponse.Success("Users retrieved successfully", results));
+        }
+
         public async Task<ApiResponse> LoginRegisteredUserlo(LoginReqDto loginReq)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginReq.Email);
@@ -67,11 +97,19 @@ namespace Remitplus_Authentication.Interface
             await _context.SaveChangesAsync();
 
             var token = _jwtService.GenerateToken(user.UserId, user.FullName);
+            string? role = await _context.ApplicationUserRoles
+                .Where(r => r.ApllicationUserId == user.UserId)
+                .Select(r => r.RoleName)
+                .FirstOrDefaultAsync();
 
             return ApiResponse.Success("Login successful", new
             {
                 Token = token,
-                Name = user.FullName
+                Fullname = user.FullName,
+                Email = user.Email,
+                UserId = user.UserId,
+                LastLogin = user.LastLoginAt,
+                Role = role
             });
         }
 

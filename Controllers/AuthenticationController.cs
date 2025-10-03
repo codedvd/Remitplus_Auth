@@ -24,6 +24,12 @@ namespace Remitplus_Authentication.Controllers
             return Ok(login);
         }
 
+        [HttpGet("get-all-users")]
+        public async Task<IActionResult> GetInAppUser()
+        {
+            return Ok(await _authenticate.GetAllUser());
+        }
+
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword(ResetPasswordReqDto resetPassword)
         {
