@@ -25,6 +25,8 @@ public partial class User
 
     public string? Status { get; set; }
 
+    public Guid? RoleId { get; set; }
+
     public virtual ICollection<IpWhitelist> IpWhitelists { get; set; } = new List<IpWhitelist>();
 
     public virtual ICollection<UserApiKey> UserApiKeys { get; set; } = new List<UserApiKey>();

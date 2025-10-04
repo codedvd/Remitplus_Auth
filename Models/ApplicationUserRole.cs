@@ -12,6 +12,4 @@ public partial class ApplicationUserRole
     public string? RoleDescription { get; set; }
 
     public DateTime CreatedDate { get; set; }
-
-    public Guid ApllicationUserId { get; set; }
 }

@@ -10,8 +10,10 @@ namespace Remitplus_Authentication.Interface
         Task<ApiResponse> CreateANewUser(OnboardUserReqDto userReqDto);
         Task<ApiResponse> ForgetPasswordOperation(ForgetPassReqDto forgetPassReq);
         Task<ApiResponse> GetAllUser();
+        Task<ApiResponse> GetAllUserROles();
         Task<ApiResponse> LoginRegisteredUserlo(LoginReqDto loginReq);
         Task<ApiResponse> ResetPasswordOperation(ResetPasswordReqDto resetPassword);
+        Task<ApiResponse> UpdateUserOperation(UpdateUserReqDto reqDto);
     }
 
     public class AuthenticateUserService(RemitplusDatabaseContext context, IEncryptionHandler encrypt, IJwtService jwtService) : IAuthenticateUserService
@@ -26,7 +28,8 @@ namespace Remitplus_Authentication.Interface
             var user = await _context.Users.FirstOrDefaultAsync(e => e.Email.Equals(userReqDto.Email));
             if (user != null)
                 return ApiResponse.Failed("Email already registered.");
-           
+            var roleExists = await _context.ApplicationUserRoles.AsNoTracking().ToListAsync();
+
             var newUser = new User
             {
                 FullName = userReqDto.FullName,
@@ -38,18 +41,10 @@ namespace Remitplus_Authentication.Interface
                 UserId = Guid.NewGuid(),
                 IsActive = true,
                 Status = Status.Pending.ToString(),
+                RoleId = roleExists.FirstOrDefault(r => r.RoleName == userReqDto.Role)?.RoleId
             };
             
             _context.Users.Add(newUser);
-            await _context.ApplicationUserRoles.AddAsync(new ApplicationUserRole
-            {
-                RoleId = Guid.NewGuid(),
-                CreatedDate = DateTime.UtcNow,
-                ApllicationUserId = newUser.UserId,
-                RoleName = userReqDto.Role,
-                RoleDescription = "User Role"
-            });
-
             await _context.SaveChangesAsync();
 
             return ApiResponse.Success("User created successfully", newUser);
@@ -68,7 +63,7 @@ namespace Remitplus_Authentication.Interface
         public Task<ApiResponse> GetAllUser()
         {
             var results = from u in _context.Users
-                          join r in _context.ApplicationUserRoles on u.UserId equals r.ApllicationUserId
+                          join r in _context.ApplicationUserRoles on u.RoleId equals r.RoleId
                           select new
                           {
                               UserId = u.UserId,
@@ -84,6 +79,20 @@ namespace Remitplus_Authentication.Interface
             return Task.FromResult(ApiResponse.Success("Users retrieved successfully", results));
         }
 
+        public async Task<ApiResponse> GetAllUserROles()
+        {
+            var roles = await _context.ApplicationUserRoles.AsNoTracking().ToListAsync();
+            if(roles.Count == 0)
+                return ApiResponse.Failed("No roles found");
+
+            return ApiResponse.Success("Roles retrieved successfully", roles.Select(r => new
+            {
+                RoleId = r.RoleId,
+                RoleName = r.RoleName,
+                RoleDescription = r.RoleDescription
+            }));
+        }
+
         public async Task<ApiResponse> LoginRegisteredUserlo(LoginReqDto loginReq)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginReq.Email);
@@ -97,10 +106,9 @@ namespace Remitplus_Authentication.Interface
             await _context.SaveChangesAsync();
 
             var token = _jwtService.GenerateToken(user.UserId, user.FullName);
-            string? role = await _context.ApplicationUserRoles
-                .Where(r => r.ApllicationUserId == user.UserId)
-                .Select(r => r.RoleName)
-                .FirstOrDefaultAsync();
+            string? role = await (from r in _context.ApplicationUserRoles
+                           where r.RoleId == user.RoleId
+                           select r.RoleName).FirstOrDefaultAsync();
 
             return ApiResponse.Success("Login successful", new
             {
@@ -129,5 +137,21 @@ namespace Remitplus_Authentication.Interface
 
             return ApiResponse.Success("Password reset successful.");
         }
+
+        public async Task<ApiResponse> UpdateUserOperation(UpdateUserReqDto reqDto)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == Guid.Parse(reqDto.UserId));
+            if (user == null)
+                return ApiResponse.Failed("User Not found");
+
+            user.Status = reqDto.Status;
+            user.RoleId = Guid.Parse(reqDto.RoleId);
+            _context.Users.Update(user);
+
+            await _context.SaveChangesAsync();
+            return ApiResponse.Success("User updated successfully", user);
+        }
+
+
     }
 }

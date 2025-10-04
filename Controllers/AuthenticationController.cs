@@ -30,6 +30,19 @@ namespace Remitplus_Authentication.Controllers
             return Ok(await _authenticate.GetAllUser());
         }
 
+        [HttpGet("get-all-roles")]
+        public async Task<IActionResult> GetAllUserROles()
+        {
+            return Ok(await _authenticate.GetAllUserROles());
+        }
+
+        [HttpPost]
+        [Route("update-user")]
+        public async Task<IActionResult> UpdateUser(UpdateUserReqDto reqDto)
+        {
+            return Ok(await _authenticate.UpdateUserOperation(reqDto));
+        }
+
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword(ResetPasswordReqDto resetPassword)
         {
