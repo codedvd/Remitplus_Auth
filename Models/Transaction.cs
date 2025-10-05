@@ -9,9 +9,9 @@ public partial class Transaction
 
     public string AppId { get; set; } = null!;
 
-    public string? AuditId { get; set; }
+    public string AuditId { get; set; } = null!;
 
-    public string? BankReference { get; set; }
+    public string BankReference { get; set; } = null!;
 
     public decimal Amount { get; set; }
 
@@ -21,7 +21,7 @@ public partial class Transaction
 
     public string Status { get; set; } = null!;
 
-    public string? Narration { get; set; }
+    public string Narration { get; set; } = null!;
 
     public string? SourceAccount { get; set; }
 
@@ -30,6 +30,10 @@ public partial class Transaction
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
+
+    public string TransactionReference { get; set; } = null!;
+
+    public Guid UserId { get; set; }
 
     public virtual ICollection<FailedRequest> FailedRequests { get; set; } = new List<FailedRequest>();
 }

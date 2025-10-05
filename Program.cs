@@ -15,6 +15,7 @@ builder.Services.AddScoped<IApiKeysGeneratorService, ApiKeyGeneratorService>();
 builder.Services.AddScoped<IAuthenticateUserService, AuthenticateUserService>();
 builder.Services.AddScoped<IAuthenticateRepository, AuthenticateRepository>();
 builder.Services.AddScoped<IApiKeyGeneratorRepository, ApiKeyGeneratorRepository>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IEncryptionHandler, EncryptionHandler>();
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.AddScoped<IJwtService, JwtService>();

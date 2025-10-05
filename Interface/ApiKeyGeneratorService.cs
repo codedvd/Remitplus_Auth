@@ -25,11 +25,12 @@ namespace Remitplus_Authentication.Interface
                 return ApiResponse.Failed("Invalid user.");
             var existingKey = await _context.UserApiKeys
                 .FirstOrDefaultAsync(k => k.ApplicationUserId == user.UserId);
+            var newApiKey = ApiKeyHelper.GenerateApiKey();
 
             switch (existingKey != null)
             {
                 case true:
-                    existingKey.ApiKeyHash = _encrypt.AESEncryptData(ApiKeyHelper.GenerateApiKey());
+                    existingKey.ApiKeyHash = _encrypt.AESEncryptData(newApiKey);
                     existingKey.ExpiryDate = DateTime.UtcNow.AddDays(30).AddMinutes(-1);
                     existingKey.IsValid = true;
                     existingKey.IsDeleted = false;
@@ -42,12 +43,12 @@ namespace Remitplus_Authentication.Interface
                     var apiKey = new UserApiKey
                     {
                         ApplicationUserId = user.UserId,
-                        ApiKeyHash = _encrypt.AESEncryptData(ApiKeyHelper.GenerateApiKey()),
+                        ApiKeyHash = _encrypt.AESEncryptData(newApiKey),
                         IsValid = true,
                         IsDeleted = false,
                         CreateAt = DateTime.UtcNow,
                         ExpiryDate = DateTime.UtcNow.AddDays(30).AddMinutes(-1),
-                        CreatedById = user.UserId.ToString(),
+                        CreatedById = user.UserId.ToString()
                     };
                     _context.UserApiKeys.Add(apiKey);
                     break;
@@ -55,7 +56,7 @@ namespace Remitplus_Authentication.Interface
 
             await _context.SaveChangesAsync();
 
-            return ApiResponse.Success("API key generated successfully");
+            return ApiResponse.Success("API key generated successfully", newApiKey);
         }
 
         public Task<ApiResponse> GetUserApiKeyOperation()
