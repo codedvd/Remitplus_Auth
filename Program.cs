@@ -7,6 +7,7 @@ using Remitplus_Authentication.Middlewares;
 using Remitplus_Authentication.Models;
 using Remitplus_Authentication.Models.Dtos;
 using Remitplus_Authentication.Repository;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +33,12 @@ builder.Services.AddCors(options =>
             .AllowCredentials()
             .WithExposedHeaders("Content-Disposition");
     });
+});
+
+builder.Services.AddControllers()
+.AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
 builder.Services.AddSwaggerGen(c =>

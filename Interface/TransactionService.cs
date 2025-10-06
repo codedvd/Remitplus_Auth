@@ -21,26 +21,38 @@ namespace Remitplus_Authentication.Interface
         {
             var transactions = await (from trnx in _context.Transactions
                                       where trnx.BankReference != null
-                                      select trnx).ToListAsync();
+                                      select new
+                                      {
+                                          id = trnx.TransactionReference,
+                                          userId = trnx.UserId,
+                                          type = trnx.TransactionType,
+                                          status = trnx.Status,
+                                          amount = trnx.Amount,
+                                          currency = trnx.Currency,
+                                          description = trnx.Narration,
+                                          referenceId = trnx.BankReference,
+                                          createdAt = trnx.CreatedAt,
+                                          updatedAt = trnx.UpdatedAt
+                                      }).ToListAsync();
 
             if (transactions == null || transactions.Count == 0)
             {
                 return ApiResponse.Failed("No transactions found.");
             }
 
-            if (queryReq.TransactionType != TransactionType.All)
+            if (queryReq.TransactionType != TransactionType.all)
             {
-                transactions = [.. transactions.Where(x => x.TransactionType == queryReq.TransactionType.ToString())];
+                transactions = [.. transactions.Where(x => x.type.ToLower() == queryReq.TransactionType.ToString())];
             }
 
-            if (queryReq.TransactionStatus != TransactionStatuses.All)
+            if (queryReq.TransactionStatus != TransactionStatuses.all)
             {
-                transactions = [.. transactions.Where(x => x.Status == queryReq.TransactionStatus.ToString())];
+                transactions = [.. transactions.Where(x => x.status.ToLower() == queryReq.TransactionStatus.ToString())];
             }
 
             if (!String.IsNullOrEmpty(queryReq.StartDate) && !String.IsNullOrEmpty(queryReq.EndDate))
             {
-                transactions = [.. transactions.Where(x => x.CreatedAt >= DateTime.Parse(queryReq.StartDate) && x.CreatedAt <= DateTime.Parse(queryReq.EndDate))];
+                transactions = [.. transactions.Where(x => x.createdAt >= DateTime.Parse(queryReq.StartDate) && x.createdAt <= DateTime.Parse(queryReq.EndDate))];
             }
             return ApiResponse.Success("Transactions retrieved successfully", transactions);
         }
@@ -92,12 +104,12 @@ namespace Remitplus_Authentication.Interface
                 return ApiResponse.Failed("No transactions found for the user");
             }
 
-            if(queryReq.TransactionType != TransactionType.All)
+            if(queryReq.TransactionType != TransactionType.all)
             {
                 transactions = [.. transactions.Where(x => x.Type == queryReq.TransactionType.ToString())];
             }
 
-            if(queryReq.TransactionStatus != TransactionStatuses.All)
+            if(queryReq.TransactionStatus != TransactionStatuses.all)
             {
                 transactions = [.. transactions.Where(x => x.Status == queryReq.TransactionStatus.ToString())];
             }
@@ -117,8 +129,8 @@ namespace Remitplus_Authentication.Interface
 
             var totalTransactions = transactions.Count;
             var totalAmount = transactions.Sum(x => x.Amount);
-            var pending  = transactions.Count(x => x.Status == TransactionStatuses.Pending.ToString());
-            var completed = transactions.Count(x => x.Status == TransactionStatuses.Completed.ToString());
+            var pending  = transactions.Count(x => x.Status == TransactionStatuses.pending.ToString());
+            var completed = transactions.Count(x => x.Status == TransactionStatuses.completed.ToString());
 
             var recentTransactions = (from transc in transactions
                                       orderby transc.CreatedAt descending

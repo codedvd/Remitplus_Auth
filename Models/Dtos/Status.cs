@@ -11,19 +11,19 @@
 
     public enum TransactionStatuses
     {
-        All = 0,
-        Pending = 1,
-        Completed = 2,
-        Failed = 3,
-        Cancelled = 4,
+        all = 0,
+        pending = 1,
+        completed = 2,
+        failed = 3,
+        cancelled = 4,
     }
 
     public enum TransactionType
     {
-        All = 0,
-        Payment = 1,
-        Refund = 2,
-        Transfer = 3,
-        Withdrawal = 4
+        all = 0,
+        payment = 1,
+        refund = 2,
+        transfer = 3,
+        withdrawal = 4
     }
 }
