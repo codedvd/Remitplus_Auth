@@ -21,6 +21,7 @@ builder.Services.AddScoped<IEncryptionHandler, EncryptionHandler>();
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IIPService, IPService>();
+builder.Services.AddHealthChecks();
 
 builder.Services.AddCors(options =>
 {
@@ -107,6 +108,7 @@ if (app.Environment.IsDevelopment())
 app.UseSwagger();
 app.UseSwaggerUI();
 
+app.UseHealthChecks("/health");
 app.UseHttpsRedirection();
 
 app.MapWhen(
