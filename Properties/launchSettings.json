@@ -15,10 +15,7 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "XApiKey": "xQn3viEzqYQUR!FsD47ybjlcno5=O4a3lPIVRgxzTSYAu3cbT4/TcJI267FxoKho",
-        "Encryption:Key": "9rF!sY7uQ#Lp8vK@tWx2BZ5dM1eH0C3N",
-        "Encryption:Iv": "G7vL!p2@Nk#3Bt9Z"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7160;http://localhost:5173"
