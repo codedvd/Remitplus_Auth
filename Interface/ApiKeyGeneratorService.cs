@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Remitplus_Accessbank_Service.Helper;
 using Remitplus_Authentication.Helper;
 using Remitplus_Authentication.Models;
@@ -12,6 +13,7 @@ namespace Remitplus_Authentication.Interface
         Task<ApiResponse> ActivateDeactvateKey(ActivateApiReq apiReq);
         Task<ApiResponse> DeleteApiKey(string keyId);
         Task<ApiResponse> GenerateApiKeysOperation(GenerateKeysReqDto generateKeys);
+        Task<ApiResponse> GenerateNewEncryptionKeys();
         Task<ApiResponse> GetUserApiKeyOperation();
     }
 
@@ -82,6 +84,7 @@ namespace Remitplus_Authentication.Interface
                     _context.UserApiKeys.Update(existingKey);
                     break;
                 case false:
+                    var (Key, IV) = CryptoGenerator.GenerateKeyAndIV();
                     var apiKey = new UserApiKey
                     {
                         ApplicationUserId = user.UserId,
@@ -90,16 +93,38 @@ namespace Remitplus_Authentication.Interface
                         IsDeleted = false,
                         CreateAt = DateTime.UtcNow,
                         ExpiryDate = DateTime.UtcNow.AddDays(30).AddMinutes(-1),
-                        CreatedById = user.UserId.ToString()
+                        CreatedById = user.UserId.ToString(),
+                        EncryptionKeys = _encrypt.AESEncryptData($"{Key} | {IV}")
                     };
 
                     _context.UserApiKeys.Add(apiKey);
                     break;
             }
+            
 
             await _context.SaveChangesAsync();
 
             return ApiResponse.Success("API key generated successfully", newApiKey);
+        }
+
+        public async Task<ApiResponse> GenerateNewEncryptionKeys()
+        {
+            var userId = _config["sub"]?.ToString();
+            if (userId == null)
+                return ApiResponse.Failed("Unable to generate keys, contact admin!");
+
+            var userKeys = await (from ks in _context.UserApiKeys
+                                  where ks.ApplicationUserId == Guid.Parse(userId)
+                                  select ks).FirstOrDefaultAsync();
+            if (userKeys == null)
+                return ApiResponse.Failed("No field key for user is found.");
+
+            var (Key, IV) = CryptoGenerator.GenerateKeyAndIV();
+            userKeys.EncryptionKeys = _encrypt.AESEncryptData($"{Key} | {IV}");
+            _context.UserApiKeys.Update(userKeys);
+            await _context.SaveChangesAsync();
+
+            return ApiResponse.Success("Encryption key generated successfully.");
         }
 
         public Task<ApiResponse> GetUserApiKeyOperation()
@@ -118,6 +143,7 @@ namespace Remitplus_Authentication.Interface
             return Task.FromResult(ApiResponse.Success("API key retrieved successfully", apiKeys.Select(a => new GetKeyResponse
             {
                 ApiKey = _encrypt.AESDecryptData(a.ApiKeyHash),
+                EncryptionKey = a.EncryptionKeys,
                 Id = a.Id,
                 IsActive = a.IsActive,
                 LastUsed = a.LastUsed.ToString() ?? "",
