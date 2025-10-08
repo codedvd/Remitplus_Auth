@@ -108,8 +108,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-//app.UseMiddleware<JwtValidationMiddleware>();
-//app.UseMiddleware<ApiKeyMiddleware>();
+app.UseMiddleware<JwtValidationMiddleware>();
+app.UseMiddleware<ApiKeyMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();

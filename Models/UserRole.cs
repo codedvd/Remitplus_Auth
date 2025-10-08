@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Remitplus_Authentication.Models;
 
-public partial class ApplicationUserRole
+public partial class UserRole
 {
     public Guid RoleId { get; set; }
 

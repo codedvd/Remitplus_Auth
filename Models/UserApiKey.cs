@@ -11,7 +11,7 @@ public partial class UserApiKey
 
     public string ApiKeyHash { get; set; } = null!;
 
-    public bool IsValid { get; set; }
+    public bool IsActive { get; set; }
 
     public bool IsDeleted { get; set; }
 
@@ -22,6 +22,8 @@ public partial class UserApiKey
     public DateTime ExpiryDate { get; set; }
 
     public string CreatedById { get; set; } = null!;
+
+    public DateTime? LastUsed { get; set; }
 
     public virtual User ApplicationUser { get; set; } = null!;
 }

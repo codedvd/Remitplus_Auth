@@ -11,3 +11,9 @@ public class JwtSettings
     public string Issuer { get; set; } = string.Empty;
     public string Audience { get; set; } = string.Empty;
 }
+
+public class ActivateApiReq
+{
+    public int ApiId { get; set; }
+    public bool IsActive { get; set; }
+}

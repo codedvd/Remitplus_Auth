@@ -1,1 +1,0 @@
-Scaffold-DbContext "Host=localhost;Port=5432;Username=postgres;Password=Ywahp0110@!;Database=Remitplus_Database;Trust Server Certificate=true" Npgsql.EntityFrameworkCore.PostgreSQL -OutputDir Models -f

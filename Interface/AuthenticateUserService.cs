@@ -28,7 +28,7 @@ namespace Remitplus_Authentication.Interface
             var user = await _context.Users.FirstOrDefaultAsync(e => e.Email.Equals(userReqDto.Email));
             if (user != null)
                 return ApiResponse.Failed("Email already registered.");
-            var roleExists = await _context.ApplicationUserRoles.AsNoTracking().ToListAsync();
+            var roleExists = await _context.UserRoles.AsNoTracking().ToListAsync();
 
             var newUser = new User
             {
@@ -63,7 +63,7 @@ namespace Remitplus_Authentication.Interface
         public Task<ApiResponse> GetAllUser()
         {
             var results = from u in _context.Users
-                          join r in _context.ApplicationUserRoles on u.RoleId equals r.RoleId
+                          join r in _context.UserRoles on u.RoleId equals r.RoleId
                           select new
                           {
                               UserId = u.UserId,
@@ -81,7 +81,7 @@ namespace Remitplus_Authentication.Interface
 
         public async Task<ApiResponse> GetAllUserROles()
         {
-            var roles = await _context.ApplicationUserRoles.AsNoTracking().ToListAsync();
+            var roles = await _context.UserRoles.AsNoTracking().ToListAsync();
             if(roles.Count == 0)
                 return ApiResponse.Failed("No roles found");
 
@@ -106,7 +106,7 @@ namespace Remitplus_Authentication.Interface
             await _context.SaveChangesAsync();
 
             var token = _jwtService.GenerateToken(user.UserId, user.FullName);
-            string? role = await (from r in _context.ApplicationUserRoles
+            string? role = await (from r in _context.UserRoles
                            where r.RoleId == user.RoleId
                            select r.RoleName).FirstOrDefaultAsync();
 

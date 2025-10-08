@@ -18,3 +18,13 @@ public class RecentTransaction
     public string Status { get; set; } = string.Empty;
     public string Currency { get; set; } = string.Empty;
 }
+
+public class GetKeyResponse
+{
+    public int Id { get; set; }
+    public string ApiKey { get; set; } = string.Empty;
+    public bool IsActive { get; set; }
+    public string Expiry { get; set; } = string.Empty;
+    public string LastUsed { get; set; } = string.Empty;
+    public string CreatedAt { get; set; } = string.Empty;
+}

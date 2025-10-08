@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Remitplus_Accessbank_Service.Helper;
 using Remitplus_Authentication.Helper;
 using Remitplus_Authentication.Models;
@@ -8,6 +9,8 @@ namespace Remitplus_Authentication.Interface
 {
     public interface IApiKeysGeneratorService
     {
+        Task<ApiResponse> ActivateDeactvateKey(ActivateApiReq apiReq);
+        Task<ApiResponse> DeleteApiKey(string keyId);
         Task<ApiResponse> GenerateApiKeysOperation(GenerateKeysReqDto generateKeys);
         Task<ApiResponse> GetUserApiKeyOperation();
     }
@@ -17,6 +20,45 @@ namespace Remitplus_Authentication.Interface
         private readonly RemitplusDatabaseContext _context = context;
         private readonly IEncryptionHandler _encrypt = encrypt;
         private readonly IConfiguration _config = config;
+
+        public async Task<ApiResponse> ActivateDeactvateKey(ActivateApiReq apiReq)
+        {
+            var userId = _config["sub"]?.ToString();
+            if(userId == null)
+            {
+                return ApiResponse.Failed("User is not authorized");
+            }
+            var apiKey = await (from a in _context.UserApiKeys
+                                where a.Id == apiReq.ApiId && a.ApplicationUserId == Guid.Parse(userId)
+                                select a).FirstOrDefaultAsync();
+            if (apiKey == null)
+                return ApiResponse.Failed("Api Key does not exist!");
+
+            apiKey.IsActive = apiReq.IsActive;
+            _context.Update(apiKey);
+            await _context.SaveChangesAsync();
+            string message = apiReq.IsActive ? "Activated" : "Deactivated";
+            return ApiResponse.Success($"Api has been {message} successfully.");
+        }
+
+        public async Task<ApiResponse> DeleteApiKey(string keyId)
+        {
+            var userId = _config["sub"]?.ToString();
+            if(userId == null)
+                return ApiResponse.Failed($"Unable to delete {keyId}");
+            var apikey = await _context.UserApiKeys.FirstOrDefaultAsync(k => k.Id == int.Parse(keyId)
+                        && k.ApplicationUserId == Guid.Parse(userId));
+
+            if (apikey == null)
+                return ApiResponse.Failed("Apikey is not found.");
+
+            apikey.IsDeleted = true;
+            apikey.IsActive = false;
+            _context.Update(apikey);
+            await _context.SaveChangesAsync();
+
+            return ApiResponse.Success($"Api key with id: {keyId} has been deleted");
+        }
 
         public async Task<ApiResponse> GenerateApiKeysOperation(GenerateKeysReqDto generateKeys)
         {
@@ -32,7 +74,7 @@ namespace Remitplus_Authentication.Interface
                 case true:
                     existingKey.ApiKeyHash = _encrypt.AESEncryptData(newApiKey);
                     existingKey.ExpiryDate = DateTime.UtcNow.AddDays(30).AddMinutes(-1);
-                    existingKey.IsValid = true;
+                    existingKey.IsActive = true;
                     existingKey.IsDeleted = false;
                     existingKey.CreateAt = DateTime.UtcNow;
                     existingKey.CreatedById = user.UserId.ToString();
@@ -44,12 +86,13 @@ namespace Remitplus_Authentication.Interface
                     {
                         ApplicationUserId = user.UserId,
                         ApiKeyHash = _encrypt.AESEncryptData(newApiKey),
-                        IsValid = true,
+                        IsActive = true,
                         IsDeleted = false,
                         CreateAt = DateTime.UtcNow,
                         ExpiryDate = DateTime.UtcNow.AddDays(30).AddMinutes(-1),
                         CreatedById = user.UserId.ToString()
                     };
+
                     _context.UserApiKeys.Add(apiKey);
                     break;
             }
@@ -67,16 +110,20 @@ namespace Remitplus_Authentication.Interface
                 return Task.FromResult(ApiResponse.Failed("Invalid user."));
 
             var apiKeys = _context.UserApiKeys
-                .FirstOrDefault(k => k.ApplicationUserId == user.UserId && !k.IsDeleted);
+                .Where(k => k.ApplicationUserId == user.UserId && !k.IsDeleted).ToList();
 
             if (apiKeys == null)
                 return Task.FromResult(ApiResponse.Failed("No API key found for this user."));
 
-            return Task.FromResult(ApiResponse.Success("API key retrieved successfully", new
+            return Task.FromResult(ApiResponse.Success("API key retrieved successfully", apiKeys.Select(a => new GetKeyResponse
             {
-                ApiKey = _encrypt.AESDecryptData(apiKeys.ApiKeyHash),
-                Expiry = apiKeys.ExpiryDate
-            }));
+                ApiKey = _encrypt.AESDecryptData(a.ApiKeyHash),
+                Id = a.Id,
+                IsActive = a.IsActive,
+                LastUsed = a.LastUsed.ToString() ?? "",
+                CreatedAt = a.CreateAt.ToString(),
+                Expiry = a.ExpiryDate.ToString(),
+            })));
         }
     }
 }

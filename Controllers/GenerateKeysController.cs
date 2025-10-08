@@ -23,5 +23,17 @@ namespace Remitplus_Authentication.Controllers
             var getkeys = await _apiKeysGenerator.GetUserApiKeyOperation();
             return Ok(getkeys);
         }
+
+        [HttpPost("action-api-key")]
+        public async Task<ActionResult<ApiResponse>> ActiveDeactivateAPIKey(ActivateApiReq apiReq)
+        {
+            return(await _apiKeysGenerator.ActivateDeactvateKey(apiReq));
+        }
+
+        [HttpDelete("delete-api-key")]
+        public async Task<ActionResult<ApiResponse>> DeleteApiKey(string keyId)
+        {
+            return (await _apiKeysGenerator.DeleteApiKey(keyId));
+        }
     }
 }
