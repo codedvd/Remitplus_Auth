@@ -109,11 +109,24 @@ app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
-app.UseMiddleware<JwtValidationMiddleware>();
-app.UseMiddleware<ApiKeyMiddleware>();
+app.MapWhen(
+    context => context.Request.Path.StartsWithSegments("/api"),
+    apiApp =>
+    {
+        app.UseMiddleware<JwtValidationMiddleware>();
+        app.UseMiddleware<ApiKeyMiddleware>();
+
+        apiApp.UseRouting();
+        apiApp.UseAuthorization();
+        apiApp.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+        });
+    }
+);
+
 
 app.UseAuthentication();
-app.UseAuthorization();
 
 app.MapControllers();
 
