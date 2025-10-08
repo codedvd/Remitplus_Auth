@@ -35,5 +35,11 @@ namespace Remitplus_Authentication.Controllers
         {
             return (await _apiKeysGenerator.DeleteApiKey(keyId));
         }
+
+        [HttpPost("generate-new-encryptionkeys")]
+        public async Task<ActionResult<ApiResponse>> GenerateNewEncryptionKeys()
+        {
+            return (await _apiKeysGenerator.GenerateNewEncryptionKeys());
+        }
     }
 }
