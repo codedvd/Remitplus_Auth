@@ -26,4 +26,18 @@
         transfer = 3,
         withdrawal = 4
     }
+
+    public enum UserStatus
+    {
+        All = 0,
+        Active = 1,
+        Inactive = 2,
+    }
+
+    public enum UserType
+    {
+        All = 0,
+        Admin = 1,
+        User = 2
+    }
 }

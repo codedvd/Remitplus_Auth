@@ -24,10 +24,10 @@ namespace Remitplus_Authentication.Controllers
             return Ok(login);
         }
 
-        [HttpGet("get-all-users")]
-        public async Task<IActionResult> GetInAppUser()
+        [HttpPost("get-all-users")]
+        public async Task<IActionResult> GetInAppUser(SortUser SortUser)
         {
-            return Ok(await _authenticate.GetAllUser());
+            return Ok(await _authenticate.GetAllUser(SortUser));
         }
 
         [HttpGet("get-all-roles")]

@@ -1,9 +1,7 @@
-name: Docker Image CI
+name: CI Pipeline
 
 on:
   push:
-    branches: [ "master" ]
-  pull_request:
     branches: [ "master" ]
 
 jobs:
@@ -11,17 +9,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
       - name: Login to DockerHub
         env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
+          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+        run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
-      - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/cicd-pipeline:latest .
+      - name: Build the Docker image
+        run: docker build -t ${{secrets.DOCKER_USERNAME}}/cicd-pipeline:latest .
 
-      - name: Push Docker image
+      - name: Push to Dockerhub
         run: docker push ${{ secrets.DOCKER_USERNAME }}/cicd-pipeline:latest

@@ -9,7 +9,7 @@ namespace Remitplus_Authentication.Interface
     {
         Task<ApiResponse> CreateANewUser(OnboardUserReqDto userReqDto);
         Task<ApiResponse> ForgetPasswordOperation(ForgetPassReqDto forgetPassReq);
-        Task<ApiResponse> GetAllUser();
+        Task<ApiResponse> GetAllUser(SortUser sort);
         Task<ApiResponse> GetAllUserROles();
         Task<ApiResponse> LoginRegisteredUserlo(LoginReqDto loginReq);
         Task<ApiResponse> ResetPasswordOperation(ResetPasswordReqDto resetPassword);
@@ -60,23 +60,41 @@ namespace Remitplus_Authentication.Interface
             return ApiResponse.Success("Password reset link sent to your email.");
         }
 
-        public Task<ApiResponse> GetAllUser()
+        public async Task<ApiResponse> GetAllUser(SortUser sort)
         {
-            var results = from u in _context.Users
-                          join r in _context.UserRoles on u.RoleId equals r.RoleId
-                          select new
-                          {
-                              UserId = u.UserId,
-                              Fullname = u.FullName,
-                              Email = u.Email,
-                              PhoneNumber = u.PhoneNumber,
-                              IsActive = u.IsActive,
-                              CreatedAt = u.CreatedAt,
-                              LastLoginAt = u.LastLoginAt,
-                              Status = u.Status,
-                              Role = r.RoleName
-                          };
-            return Task.FromResult(ApiResponse.Success("Users retrieved successfully", results));
+            var query = await(from u in _context.Users
+                        join r in _context.UserRoles on u.RoleId equals r.RoleId
+                        select new
+                        {
+                            UserId = u.UserId,
+                            FullName = u.FullName,
+                            Email = u.Email,
+                            PhoneNumber = u.PhoneNumber,
+                            IsActive = u.IsActive,
+                            CreatedAt = u.CreatedAt,
+                            LastLoginAt = u.LastLoginAt,
+                            Status = u.Status,
+                            Role = r.RoleName
+                        }).ToListAsync();
+
+            if (!string.IsNullOrWhiteSpace(sort.Search))
+            {
+                query = [.. query.Where(u => u.FullName.Contains(sort.Search, StringComparison.CurrentCultureIgnoreCase) || u.Email.Contains(sort.Search, StringComparison.CurrentCultureIgnoreCase))];
+            }
+
+            if (sort.Status != UserStatus.All)
+            {
+                bool isActive = sort.Status == UserStatus.Active;
+                query = [.. query.Where(u => u.IsActive == isActive)];
+            }
+
+            if (sort.UserType != UserType.All)
+            {
+                string roleName = sort.UserType == UserType.Admin ? "Admin" : "User";
+                query = [.. query.Where(u => u.Role == roleName)];
+            }
+
+            return ApiResponse.Success("Users retrieved successfully", query);
         }
 
         public async Task<ApiResponse> GetAllUserROles()

@@ -3,6 +3,13 @@ using System.Text.Json.Serialization;
 
 namespace Remitplus_Authentication.Models.Dtos;
 
+public class SortUser
+{
+    public string? Search { get; set; }
+    public UserStatus  Status { get; set; }
+    public UserType UserType { get; set; }
+}
+
 public class OnboardUserReqDto
 {
     public string FullName { get; set; } = string.Empty;

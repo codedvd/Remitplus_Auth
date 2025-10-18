@@ -39,6 +39,13 @@ namespace Remitplus_Authentication.Interface
             {
                 return ApiResponse.Failed("No transactions found.");
             }
+            queryReq.SearchTerm = queryReq.SearchTerm.ToLower();
+            if (!string.IsNullOrEmpty(queryReq.SearchTerm))
+            {
+                transactions = [.. transactions.Where(x => x.id.Contains(queryReq.SearchTerm, StringComparison.CurrentCultureIgnoreCase) 
+                || x.referenceId.Contains(queryReq.SearchTerm, StringComparison.CurrentCultureIgnoreCase)
+                || x.status.Contains(queryReq.SearchTerm, StringComparison.CurrentCultureIgnoreCase) || x.description.Contains(queryReq.SearchTerm, StringComparison.CurrentCultureIgnoreCase))];
+            }
 
             if (queryReq.TransactionType != TransactionType.all)
             {
@@ -50,7 +57,7 @@ namespace Remitplus_Authentication.Interface
                 transactions = [.. transactions.Where(x => x.status.ToLower() == queryReq.TransactionStatus.ToString())];
             }
 
-            if (!String.IsNullOrEmpty(queryReq.StartDate) && !String.IsNullOrEmpty(queryReq.EndDate))
+            if (!string.IsNullOrEmpty(queryReq.StartDate) && !string.IsNullOrEmpty(queryReq.EndDate))
             {
                 transactions = [.. transactions.Where(x => x.createdAt >= DateTime.Parse(queryReq.StartDate) && x.createdAt <= DateTime.Parse(queryReq.EndDate))];
             }

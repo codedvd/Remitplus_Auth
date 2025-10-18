@@ -47,11 +47,11 @@ namespace Remitplus_Authentication.Middlewares
                 });
             });
 
-            services.AddControllers()
-            .AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            });
+            //services.AddControllers()
+            //.AddJsonOptions(options =>
+            //{
+            //    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            //});
 
             services.AddSwaggerGen(c =>
             {
