@@ -13,6 +13,7 @@ namespace Remitplus_Authentication.Middlewares
         private readonly JwtSettings _jwtSettings = jwtSettings.Value;
         private readonly IConfiguration _config = config;
 
+        //help
         public async Task InvokeAsync(HttpContext context)
         {
             var path = context.Request.Path.Value?.ToLower() ?? "";
