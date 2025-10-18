@@ -11,8 +11,6 @@ public partial class UserApiKey
 
     public string ApiKeyHash { get; set; } = null!;
 
-    public string EncryptionKeys { get; set; } = null!;
-
     public bool IsActive { get; set; }
 
     public bool IsDeleted { get; set; }

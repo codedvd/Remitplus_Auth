@@ -23,7 +23,6 @@ public class GetKeyResponse
 {
     public int Id { get; set; }
     public string ApiKey { get; set; } = string.Empty;
-    public string EncryptionKey { get; set; } = string.Empty;
     public bool IsActive { get; set; }
     public string Expiry { get; set; } = string.Empty;
     public string LastUsed { get; set; } = string.Empty;
