@@ -32,7 +32,7 @@ namespace Remitplus_Authentication.Middlewares
                 await context.Response.WriteAsync("JWT token is missing.");
                 return;
             }
-
+            //
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
 
