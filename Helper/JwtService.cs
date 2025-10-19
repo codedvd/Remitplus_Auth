@@ -37,7 +37,7 @@ namespace Remitplus_Authentication.Helper
                 issuer: _jwtSettings.Issuer,
                 audience: _jwtSettings.Audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(1),
+                expires: DateTime.UtcNow.AddHours(12),
                 signingCredentials: creds
             );
 
