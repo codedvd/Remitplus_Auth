@@ -45,7 +45,7 @@ namespace Remitplus_Authentication.Controllers
             return Ok(summary);
         }
 
-        [HttpGet("Test")]
+        [HttpGet("Tester")]
         public async Task<IActionResult> Result()
         {
             return Ok(); 
