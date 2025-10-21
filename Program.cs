@@ -10,6 +10,7 @@ Log.Logger = new LoggerConfiguration()
         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
     )
     .CreateLogger();
+builder.Host.UseSerilog();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
