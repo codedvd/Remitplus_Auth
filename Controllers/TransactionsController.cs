@@ -44,5 +44,11 @@ namespace Remitplus_Authentication.Controllers
             var summary = await _transactions.GetTransactionSummary(userId);
             return Ok(summary);
         }
+
+        [HttpGet("Test")]
+        public async Task<IActionResult> Result()
+        {
+            return Ok(); 
+        }
     }
 }
