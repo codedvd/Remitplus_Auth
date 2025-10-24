@@ -20,10 +20,6 @@ namespace Remitplus_Authentication.Interface
 
         public async Task<ApiResponse> BlacklistOperation(BlacklistIPReqDto reqDto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower().Equals(reqDto.Email.ToLower()));
-            if (user == null)
-                return ApiResponse.Failed("User Not found");
-
             var entry = await _context.IpblackLists
             .FirstOrDefaultAsync(x => x.Ipaddress == reqDto.IpAddress);
 
@@ -32,7 +28,8 @@ namespace Remitplus_Authentication.Interface
                 entry = new IpblackList
                 {
                     Id = Guid.NewGuid(),
-                    Ipaddress = reqDto.IpAddress
+                    Ipaddress = reqDto.IpAddress,
+                    IsActive = false
                 };
                 _context.IpblackLists.Add(entry);
             }
