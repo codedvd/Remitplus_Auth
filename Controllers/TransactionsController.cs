@@ -15,7 +15,7 @@ namespace Remitplus_Authentication.Controllers
         {
             return Ok(await _transactions.GetAllSystemTransactions(queryReq));
         }
-
+        //
         [HttpGet("transaction/get-transaction/{tranId}")]
         public async Task<IActionResult> GetTransactionById(string tranId)
         {
