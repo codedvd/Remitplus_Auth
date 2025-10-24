@@ -10,18 +10,21 @@ namespace Remitplus_Authentication.Controllers
     {
         private readonly IEncryptionHandler _encrypt = encrypt;
 
-        [HttpGet("encrypt")]
-        public Task<IActionResult> EncryptData(dynamic data)
+        [HttpPost("encrypt")]
+        public async Task<IActionResult> EncryptData(dynamic data)
         {
             var response = _encrypt.AESEncryptData(JsonSerializer.Serialize(data));
-            return Ok(response);
+            return await Task.FromResult(Ok(new
+            {
+                data = response
+            }));
         }
 
         [HttpGet("decrypt")]
-        public Task<IActionResult> DecryptData(string data)
+        public async Task<IActionResult> DecryptData(string data)
         {
             dynamic response = _encrypt.AESDecryptData(data);
-            return Ok(response);
+            return await Task.FromResult(Ok(response));
         }
     }
 }

@@ -100,12 +100,21 @@ namespace Remitplus_Authentication.Interface
             if (entry == null)
                 return ApiResponse.Failed("No whitelist entry found for this user.");
 
+            // Deserialize existing IP list
             var currentIps = string.IsNullOrWhiteSpace(entry.IpAddress)
                 ? new List<string>()
                 : JsonSerializer.Deserialize<List<string>>(entry.IpAddress) ?? new List<string>();
 
             currentIps.RemoveAll(ip => reqDto.IpAddress.Contains(ip));
 
+            if (!currentIps.Any())
+            {
+                _context.IpWhitelists.Remove(entry);
+                await _context.SaveChangesAsync();
+                return ApiResponse.Success("Whitelist entry removed entirely — no IPs left.");
+            }
+
+            // Otherwise, update the entry
             entry.IpAddress = JsonSerializer.Serialize(currentIps);
             entry.UpdatedAt = DateTime.UtcNow;
 
@@ -113,6 +122,7 @@ namespace Remitplus_Authentication.Interface
 
             return ApiResponse.Success("IPs removed from whitelist.", currentIps);
         }
+
 
         public async Task<ApiResponse> WhitelistOperation(WhitelistIpReqDto reqDto)
         {
