@@ -14,6 +14,5 @@ public class JwtSettings
 
 public class ActivateApiReq
 {
-    public int ApiId { get; set; }
     public bool IsActive { get; set; }
 }

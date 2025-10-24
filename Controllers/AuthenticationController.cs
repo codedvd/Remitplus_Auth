@@ -63,5 +63,12 @@ namespace Remitplus_Authentication.Controllers
             return Ok(forget);
         }
 
+        [HttpDelete("delete-user")]
+        public async Task<IActionResult> DeleteUser(string userId)
+        {
+            var delResponse = await _authenticate.DeleteUserAsync(userId);
+            return Ok(delResponse);
+        }
+
     }
 }

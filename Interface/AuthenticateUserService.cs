@@ -8,6 +8,7 @@ namespace Remitplus_Authentication.Interface
     public interface IAuthenticateUserService
     {
         Task<ApiResponse> CreateANewUser(OnboardUserReqDto userReqDto);
+        Task<ApiResponse> DeleteUserAsync(string userId);
         Task<ApiResponse> ForgetPasswordOperation(ForgetPassReqDto forgetPassReq);
         Task<ApiResponse> GetAllUser(SortUser sort);
         Task<ApiResponse> GetAllUserROles();
@@ -49,6 +50,22 @@ namespace Remitplus_Authentication.Interface
             await _context.SaveChangesAsync();
 
             return ApiResponse.Success("User created successfully", newUser);
+        }
+
+        public async Task<ApiResponse> DeleteUserAsync(string userId)
+        {
+            var getUser = await _context.Users.FirstOrDefaultAsync(u => u.UserId.ToString() == userId);
+            if (getUser == null)
+                return ApiResponse.Failed($"User with Id: {userId}");
+
+            var getApiKeys = await _context.UserApiKeys.FirstOrDefaultAsync(x => x.ApplicationUserId.ToString() == userId);
+            if(getApiKeys != null)
+                _context.UserApiKeys.Remove(getApiKeys);
+
+            _context.Users.Remove(getUser);
+            await _context.SaveChangesAsync();
+
+            return ApiResponse.Success("User Deleted Successfully");
         }
 
         public async Task<ApiResponse> ForgetPasswordOperation(ForgetPassReqDto forgetPassReq)

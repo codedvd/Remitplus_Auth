@@ -29,7 +29,7 @@ namespace Remitplus_Authentication.Interface
                 return ApiResponse.Failed("User is not authorized");
             }
             var apiKey = await (from a in _context.UserApiKeys
-                                where a.Id == apiReq.ApiId && a.ApplicationUserId == Guid.Parse(userId)
+                                where a.ApplicationUserId == Guid.Parse(userId)
                                 select a).FirstOrDefaultAsync();
             if (apiKey == null)
                 return ApiResponse.Failed("Api Key does not exist!");
