@@ -21,6 +21,7 @@ namespace Remitplus_Authentication.Middlewares
             config["XApiKey"] = Environment.GetEnvironmentVariable("XAPI_KEY");
             config["Encryption:Key"] = Environment.GetEnvironmentVariable("ENCRYPTION_KEY");
             config["Encryption:Iv"] = Environment.GetEnvironmentVariable("ENCRYPTION_IV");
+            config["BaseUrl"] = Environment.GetEnvironmentVariable("SERVICE_BASE");
 
             services.AddControllers();
             services.AddScoped<IApiKeysGeneratorService, ApiKeyGeneratorService>();
@@ -32,6 +33,7 @@ namespace Remitplus_Authentication.Middlewares
             services.Configure<JwtSettings>(config.GetSection("JwtSettings"));
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IIPService, IPService>();
+            services.AddScoped<IRestClient, RestClient>();
             services.AddHealthChecks();
 
             services.AddCors(options =>

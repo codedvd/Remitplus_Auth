@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Remitplus_Authentication.Helper;
 using Remitplus_Authentication.Models;
 using Remitplus_Authentication.Models.Dtos;
 using Remitplus_Authentication.Models.Request;
@@ -8,14 +9,18 @@ namespace Remitplus_Authentication.Interface
     public interface ITransactionService
     {
         Task<ApiResponse> GetAllSystemTransactions(GetTransactionQueryReq queryReq);
+        Task<ApiResponse> GetCurrentSaleRates(string email);
         Task<ApiResponse> GetTransactionById(string tranId);
         Task<ApiResponse> GetTransactionsByUserId(Guid userId, GetTransactionQueryReq queryReq);
         Task<ApiResponse> GetTransactionSummary(Guid userId);
     }
 
-    public class TransactionService(RemitplusDatabaseContext context) : ITransactionService
+    public class TransactionService(RemitplusDatabaseContext context, IRestClient apiCall, IConfiguration configuration, IEncryptionHandler encrypt) : ITransactionService
     {
         private readonly RemitplusDatabaseContext _context = context;
+        private readonly IRestClient _apiCall = apiCall;
+        private readonly IConfiguration _configuration = configuration;
+        private readonly IEncryptionHandler _encrypt = encrypt;
 
         public async Task<ApiResponse> GetAllSystemTransactions(GetTransactionQueryReq queryReq)
         {
@@ -42,7 +47,7 @@ namespace Remitplus_Authentication.Interface
             queryReq.SearchTerm = queryReq.SearchTerm.ToLower();
             if (!string.IsNullOrEmpty(queryReq.SearchTerm))
             {
-                transactions = [.. transactions.Where(x => x.id.Contains(queryReq.SearchTerm, StringComparison.CurrentCultureIgnoreCase) 
+                transactions = [.. transactions.Where(x => x.id.Contains(queryReq.SearchTerm, StringComparison.CurrentCultureIgnoreCase)
                 || x.referenceId.Contains(queryReq.SearchTerm, StringComparison.CurrentCultureIgnoreCase)
                 || x.status.Contains(queryReq.SearchTerm, StringComparison.CurrentCultureIgnoreCase) || x.description.Contains(queryReq.SearchTerm, StringComparison.CurrentCultureIgnoreCase))];
             }
@@ -62,6 +67,31 @@ namespace Remitplus_Authentication.Interface
                 transactions = [.. transactions.Where(x => x.createdAt >= DateTime.Parse(queryReq.StartDate) && x.createdAt <= DateTime.Parse(queryReq.EndDate))];
             }
             return ApiResponse.Success("Transactions retrieved successfully", transactions);
+        }
+
+        public async Task<ApiResponse> GetCurrentSaleRates(string email)
+        {
+            var getUser = await (from u in _context.Users
+                                 join k in _context.UserApiKeys on u.UserId equals k.ApplicationUserId
+                                 select k).FirstOrDefaultAsync();
+            if (getUser == null)
+                return ApiResponse.Failed("Failed to get user data.");
+            var key = _encrypt.AESDecryptData(getUser.ApiKeyHash);
+
+            var makeRequest = _apiCall.MakeApiCallAsync(
+                url: $"{_configuration["BaseUrl"]}api/v1/Payments/getFTRate",
+                method: HttpMethod.Get,
+                headers: new Dictionary<string, string>
+                {
+                    { "XApiKey", key ?? string.Empty }
+                }
+            ).GetAwaiter().GetResult();
+
+            return ApiResponse.Success("Rate returned successful", new
+            {
+                BuyRate = "1451",
+                SellRate = "1475"
+            });
         }
 
         public async Task<ApiResponse> GetTransactionById(string tranId)
@@ -92,36 +122,36 @@ namespace Remitplus_Authentication.Interface
         public async Task<ApiResponse> GetTransactionsByUserId(Guid userId, GetTransactionQueryReq queryReq)
         {
             var transactions = await (from transc in _context.Transactions
-                               where transc.UserId == userId
-                               select new TransactionDetail
-                               {
-                                   Status = transc.Status,
-                                   Amount = transc.Amount,
-                                   CreatedAt = transc.CreatedAt,
-                                   Currency = transc.Currency,
-                                   Description = transc.Narration,
-                                   ReferenceId = transc.TransactionReference,
-                                   TransactionReference = transc.TransactionReference,
-                                   UpdatedAt = transc.UpdatedAt,
-                                   UserId = transc.UserId.ToString(),
-                                   Type = transc.TransactionType
-                               }).ToListAsync();
+                                      where transc.UserId == userId
+                                      select new TransactionDetail
+                                      {
+                                          Status = transc.Status,
+                                          Amount = transc.Amount,
+                                          CreatedAt = transc.CreatedAt,
+                                          Currency = transc.Currency,
+                                          Description = transc.Narration,
+                                          ReferenceId = transc.TransactionReference,
+                                          TransactionReference = transc.TransactionReference,
+                                          UpdatedAt = transc.UpdatedAt,
+                                          UserId = transc.UserId.ToString(),
+                                          Type = transc.TransactionType
+                                      }).ToListAsync();
             if (transactions == null || transactions.Count == 0)
             {
                 return ApiResponse.Failed("No transactions found for the user");
             }
 
-            if(queryReq.TransactionType != TransactionType.all)
+            if (queryReq.TransactionType != TransactionType.all)
             {
                 transactions = [.. transactions.Where(x => x.Type == queryReq.TransactionType.ToString())];
             }
 
-            if(queryReq.TransactionStatus != TransactionStatuses.all)
+            if (queryReq.TransactionStatus != TransactionStatuses.all)
             {
                 transactions = [.. transactions.Where(x => x.Status == queryReq.TransactionStatus.ToString())];
             }
 
-            if(!String.IsNullOrEmpty(queryReq.StartDate) && !String.IsNullOrEmpty(queryReq.EndDate))
+            if (!String.IsNullOrEmpty(queryReq.StartDate) && !String.IsNullOrEmpty(queryReq.EndDate))
             {
                 transactions = [.. transactions.Where(x => x.CreatedAt >= DateTime.Parse(queryReq.StartDate) && x.CreatedAt <= DateTime.Parse(queryReq.EndDate))];
             }
@@ -136,7 +166,7 @@ namespace Remitplus_Authentication.Interface
 
             var totalTransactions = transactions.Count;
             var totalAmount = transactions.Sum(x => x.Amount);
-            var pending  = transactions.Count(x => x.Status == TransactionStatuses.pending.ToString());
+            var pending = transactions.Count(x => x.Status == TransactionStatuses.pending.ToString());
             var completed = transactions.Count(x => x.Status == TransactionStatuses.completed.ToString());
 
             var recentTransactions = (from transc in transactions
@@ -161,5 +191,7 @@ namespace Remitplus_Authentication.Interface
             };
             return ApiResponse.Success("Transaction summary retrieved successfully", summary);
         }
+
+
     }
 }
