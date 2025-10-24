@@ -3,7 +3,7 @@
     public enum Status
     {
         Active,
-        Inactive,
+        InActive,
         Pending,
         Suspended,
         Deleted

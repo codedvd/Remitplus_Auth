@@ -11,6 +11,7 @@ namespace Remitplus_Authentication.Interface
         Task<ApiResponse> ForgetPasswordOperation(ForgetPassReqDto forgetPassReq);
         Task<ApiResponse> GetAllUser(SortUser sort);
         Task<ApiResponse> GetAllUserROles();
+        Task<ApiResponse> GetUserAnalytics();
         Task<ApiResponse> LoginRegisteredUserlo(LoginReqDto loginReq);
         Task<ApiResponse> ResetPasswordOperation(ResetPasswordReqDto resetPassword);
         Task<ApiResponse> UpdateUserOperation(UpdateUserReqDto reqDto);
@@ -109,6 +110,20 @@ namespace Remitplus_Authentication.Interface
                 RoleName = r.RoleName,
                 RoleDescription = r.RoleDescription
             }));
+        }
+
+        public async Task<ApiResponse> GetUserAnalytics()
+        {
+            var allUsers = await(from u  in _context.Users
+                                 select u).ToListAsync();
+            var analytics = new
+            {
+                TotalUsers = allUsers.Count,
+                ActiveUsers = allUsers.Where(u => u.Status == Status.Active.ToString()).Count(),
+                InActiveUser = allUsers.Where(u => u.Status == Status.InActive.ToString()).Count(),
+                PendingUsers = allUsers.Where(u => u.Status == Status.Pending.ToString()).Count()
+            };
+            return ApiResponse.Success("Analytics returned successful", analytics);
         }
 
         public async Task<ApiResponse> LoginRegisteredUserlo(LoginReqDto loginReq)

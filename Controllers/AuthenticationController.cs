@@ -30,6 +30,12 @@ namespace Remitplus_Authentication.Controllers
             return Ok(await _authenticate.GetAllUser(SortUser));
         }
 
+        [HttpGet("get-user-analytics")]
+        public async Task<IActionResult> GetUserAnalytics()
+        {
+            return Ok(await _authenticate.GetUserAnalytics());
+        }
+
         [HttpGet("get-all-roles")]
         public async Task<IActionResult> GetAllUserROles()
         {
