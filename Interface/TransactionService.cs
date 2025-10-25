@@ -3,6 +3,7 @@ using Remitplus_Authentication.Helper;
 using Remitplus_Authentication.Models;
 using Remitplus_Authentication.Models.Dtos;
 using Remitplus_Authentication.Models.Request;
+using System.Text.Json;
 
 namespace Remitplus_Authentication.Interface
 {
@@ -87,10 +88,17 @@ namespace Remitplus_Authentication.Interface
                 }
             ).GetAwaiter().GetResult();
 
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            var desc = JsonSerializer.Deserialize<RateResponse>(makeRequest.Content, options);
             return ApiResponse.Success("Rate returned successful", new
             {
-                BuyRate = "1451",
-                SellRate = "1475"
+                BuyRate = desc?.Data?.BuyRate ?? 0,
+                MidRate = desc?.Data?.MidRate ?? 0,
+                SellRate = desc?.Data?.SaleRate ?? 0,
+                RateDate = desc?.Data?.RateDate
             });
         }
 
