@@ -15,9 +15,9 @@ namespace Remitplus_Authentication.Interface
         Task<ApiResponse> GetUserApiKeyOperation();
     }
 
-    public class ApiKeyGeneratorService(RemitplusDatabaseContext context, IEncryptionHandler encrypt, IConfiguration config) : IApiKeysGeneratorService
+    public class ApiKeyGeneratorService(E2epaymetsContext context, IEncryptionHandler encrypt, IConfiguration config) : IApiKeysGeneratorService
     {
-        private readonly RemitplusDatabaseContext _context = context;
+        private readonly E2epaymetsContext _context = context;
         private readonly IEncryptionHandler _encrypt = encrypt;
         private readonly IConfiguration _config = config;
 

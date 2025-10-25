@@ -15,9 +15,9 @@ namespace Remitplus_Authentication.Interface
         Task<ApiResponse> GetTransactionSummary(Guid userId);
     }
 
-    public class TransactionService(RemitplusDatabaseContext context, IRestClient apiCall, IConfiguration configuration, IEncryptionHandler encrypt) : ITransactionService
+    public class TransactionService(E2epaymetsContext context, IRestClient apiCall, IConfiguration configuration, IEncryptionHandler encrypt) : ITransactionService
     {
-        private readonly RemitplusDatabaseContext _context = context;
+        private readonly E2epaymetsContext _context = context;
         private readonly IRestClient _apiCall = apiCall;
         private readonly IConfiguration _configuration = configuration;
         private readonly IEncryptionHandler _encrypt = encrypt;

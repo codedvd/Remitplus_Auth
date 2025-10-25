@@ -31,10 +31,6 @@ public partial class E2epaymetsContext : DbContext
 
     public virtual DbSet<WhitelistedIpLog> WhitelistedIpLogs { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseNpgsql("Host=dpg-d3j6st1r0fns73aldth0-a.oregon-postgres.render.com;Database=e2epaymets;Username=e2epaymets_user;Password=ymcIjrrF964Mzjfi24GYHLwgOCsbk7Wm;Port=5432;SSL Mode=Require;Trust Server Certificate=true");
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<FailedRequest>(entity =>

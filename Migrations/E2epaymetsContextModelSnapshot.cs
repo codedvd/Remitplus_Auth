@@ -2,7 +2,6 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Remitplus_Authentication.Models;
@@ -11,12 +10,10 @@ using Remitplus_Authentication.Models;
 
 namespace Remitplus_Authentication.Migrations
 {
-    [DbContext(typeof(RemitplusDatabaseContext))]
-    [Migration("20251009065621_Migrate2")]
-    partial class Migrate2
+    [DbContext(typeof(E2epaymetsContext))]
+    partial class E2epaymetsContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -254,10 +251,6 @@ namespace Remitplus_Authentication.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CreatedById")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("EncryptionKeys")
                         .IsRequired()
                         .HasColumnType("text");
 

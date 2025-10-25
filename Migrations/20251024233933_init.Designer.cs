@@ -11,9 +11,9 @@ using Remitplus_Authentication.Models;
 
 namespace Remitplus_Authentication.Migrations
 {
-    [DbContext(typeof(RemitplusDatabaseContext))]
-    [Migration("20251008155141_FirstMigration")]
-    partial class FirstMigration
+    [DbContext(typeof(E2epaymetsContext))]
+    [Migration("20251024233933_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

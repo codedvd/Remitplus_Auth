@@ -14,9 +14,9 @@ namespace Remitplus_Authentication.Interface
         Task<ApiResponse> WhitelistOperation(WhitelistIpReqDto reqDto);
     }
 
-    public class IPService(RemitplusDatabaseContext context) : IIPService
+    public class IPService(E2epaymetsContext context) : IIPService
     {
-        private readonly RemitplusDatabaseContext _context = context;
+        private readonly E2epaymetsContext _context = context;
 
         public async Task<ApiResponse> BlacklistOperation(BlacklistIPReqDto reqDto)
         {

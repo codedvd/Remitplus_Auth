@@ -18,9 +18,9 @@ namespace Remitplus_Authentication.Interface
         Task<ApiResponse> UpdateUserOperation(UpdateUserReqDto reqDto);
     }
 
-    public class AuthenticateUserService(RemitplusDatabaseContext context, IEncryptionHandler encrypt, IJwtService jwtService) : IAuthenticateUserService
+    public class AuthenticateUserService(E2epaymetsContext context, IEncryptionHandler encrypt, IJwtService jwtService) : IAuthenticateUserService
     {
-        private readonly RemitplusDatabaseContext _context = context;
+        private readonly E2epaymetsContext _context = context;
         private readonly IEncryptionHandler _encrypt = encrypt;
         private readonly IJwtService _jwtService = jwtService;
 

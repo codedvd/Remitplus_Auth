@@ -7,7 +7,6 @@ using Remitplus_Authentication.Interface;
 using Remitplus_Authentication.Models;
 using Remitplus_Authentication.Models.Dtos;
 using Remitplus_Authentication.Repository;
-using System.Text.Json.Serialization;
 
 namespace Remitplus_Authentication.Middlewares
 {
@@ -22,6 +21,7 @@ namespace Remitplus_Authentication.Middlewares
             config["Encryption:Key"] = Environment.GetEnvironmentVariable("ENCRYPTION_KEY");
             config["Encryption:Iv"] = Environment.GetEnvironmentVariable("ENCRYPTION_IV");
             config["BaseUrl"] = Environment.GetEnvironmentVariable("SERVICE_BASE");
+            config["DatabaseConnection"] = Environment.GetEnvironmentVariable("DB_CONNECTION");
 
             services.AddControllers();
             services.AddScoped<IApiKeysGeneratorService, ApiKeyGeneratorService>();
@@ -48,12 +48,6 @@ namespace Remitplus_Authentication.Middlewares
                         .WithExposedHeaders("Content-Disposition");
                 });
             });
-
-            //services.AddControllers()
-            //.AddJsonOptions(options =>
-            //{
-            //    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            //});
 
             services.AddSwaggerGen(c =>
             {
@@ -101,9 +95,9 @@ namespace Remitplus_Authentication.Middlewares
                 });
             });
 
-            services.AddDbContext<RemitplusDatabaseContext>(options =>
+            services.AddDbContext<E2epaymetsContext>(options =>
             {
-                options.UseNpgsql(config.GetConnectionString("DefaultConntion"));
+                options.UseNpgsql(config["DatabaseConnection"]);
             });
 
              services.AddEndpointsApiExplorer();
