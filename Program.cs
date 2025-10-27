@@ -28,11 +28,27 @@ app.UseSwaggerUI();
 
 app.UseHealthChecks("/health");
 
-app.UseMiddleware<ApiKeyMiddleware>();
-app.UseMiddleware<JwtValidationMiddleware>();
+app.MapWhen(
+    context => context.Request.Path.StartsWithSegments("/api"),
+    apiApp =>
+    {
+        apiApp.UseMiddleware<ApiKeyMiddleware>();
+        apiApp.UseMiddleware<JwtValidationMiddleware>();
+
+        apiApp.UseRouting();
+        apiApp.UseAuthorization();
+        apiApp.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+        });
+    }
+);
+
+//app.UseMiddleware<ApiKeyMiddleware>();
+//app.UseMiddleware<JwtValidationMiddleware>();
 
 app.UseAuthentication();
-app.UseAuthorization();
+//app.UseAuthorization();
 
 app.MapControllers();
 
