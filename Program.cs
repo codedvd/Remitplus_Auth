@@ -28,6 +28,9 @@ app.UseSwaggerUI();
 
 app.UseHealthChecks("/health");
 
+app.UseMiddleware<ApiKeyMiddleware>();
+app.UseMiddleware<JwtValidationMiddleware>();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
