@@ -16,6 +16,10 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
+// Serve static files (your React build)
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.UseCors("AllowAll");
 
 // Configure the HTTP request pipeline.
@@ -48,5 +52,7 @@ app.MapWhen(
 app.UseAuthentication();
 
 app.MapControllers();
+
+app.MapFallbackToFile("index.html");
 
 app.Run();
