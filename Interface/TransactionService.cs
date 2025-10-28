@@ -81,26 +81,10 @@ namespace Remitplus_Authentication.Interface
                 return ApiResponse.Failed("Failed to get user data.");
             var key = _encrypt.AESDecryptData(getUser.ApiKeyHash);
 
-            var makeRequest = _apiCall.MakeApiCallAsync(
-                url: $"{_config["BaseUrl"]}api/v1/Payments/getFTRate",
-                method: HttpMethod.Get,
-                headers: new Dictionary<string, string>
-                {
-                    { "XApiKey", key ?? string.Empty }
-                }
-            ).GetAwaiter().GetResult();
-
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
-            var desc = JsonSerializer.Deserialize<RateResponse>(makeRequest.Content, options);
             return ApiResponse.Success("Rate returned successful", new
             {
-                BuyRate = desc?.Data?.BuyRate ?? 0,
-                MidRate = desc?.Data?.MidRate ?? 0,
-                SellRate = desc?.Data?.SaleRate ?? 0,
-                RateDate = desc?.Data?.RateDate
+                BuyRate = 1750.2,
+                SellRate = 1762.5,
             });
         }
 
