@@ -30,7 +30,7 @@ namespace Remitplus_Authentication.Interface
             var user = await _context.Users.FirstOrDefaultAsync(e => e.Email.Equals(userReqDto.Email));
             if (user != null)
                 return ApiResponse.Failed("Email already registered.");
-            var roleExists = await _context.UserRoles.AsNoTracking().ToListAsync();
+            //var roleExists = await _context.UserRoles.AsNoTracking().ToListAsync();
 
             var newUser = new User
             {
@@ -43,7 +43,7 @@ namespace Remitplus_Authentication.Interface
                 UserId = Guid.NewGuid(),
                 IsActive = true,
                 Status = Status.Pending.ToString(),
-                RoleId = roleExists.FirstOrDefault(r => r.RoleName == userReqDto.Role)?.RoleId
+                RoleId = Guid.Parse(userReqDto.Role)
             };
             
             _context.Users.Add(newUser);

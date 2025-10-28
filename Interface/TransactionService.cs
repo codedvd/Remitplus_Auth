@@ -79,7 +79,6 @@ namespace Remitplus_Authentication.Interface
                                  select k).FirstOrDefaultAsync();
             if (getUser == null)
                 return ApiResponse.Failed("Failed to get user data.");
-            var key = _encrypt.AESDecryptData(getUser.ApiKeyHash);
 
             return ApiResponse.Success("Rate returned successful", new
             {
