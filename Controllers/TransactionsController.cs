@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Remitplus_Authentication.Interface;
+using Remitplus_Authentication.Models.Dtos;
 using Remitplus_Authentication.Models.Request;
 
 namespace Remitplus_Authentication.Controllers
@@ -14,6 +15,13 @@ namespace Remitplus_Authentication.Controllers
         public async Task<IActionResult> GetSaleRates()
         {
             return Ok(await _transactions.GetCurrentSaleRates());
+        }
+
+        [HttpPost("set-rate")]
+        public async Task<IActionResult> SetSaleRates(RateData rate)
+        {
+            var result = await _transactions.SetNewSaleRate(rate);
+            return Ok(result);
         }
 
         [HttpPost("transaction/get-all-transactions")]

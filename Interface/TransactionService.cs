@@ -14,6 +14,7 @@ namespace Remitplus_Authentication.Interface
         Task<ApiResponse> GetTransactionById(string tranId);
         Task<ApiResponse> GetTransactionsByUserId(Guid userId, GetTransactionQueryReq queryReq);
         Task<ApiResponse> GetTransactionSummary(Guid userId);
+        Task<RateData> SetNewSaleRate(RateData rate);
     }
 
     public class TransactionService(E2epaymetsContext context, IRestClient apiCall, IConfiguration configuration, IEncryptionHandler encrypt) : ITransactionService
@@ -72,19 +73,16 @@ namespace Remitplus_Authentication.Interface
 
         public async Task<ApiResponse> GetCurrentSaleRates()
         {
-            var userId = _config["email"]?.ToString();
-
-            var getUser = await (from u in _context.Users
-                                 join k in _context.UserApiKeys on u.UserId equals k.ApplicationUserId
-                                 select k).FirstOrDefaultAsync();
-            if (getUser == null)
-                return ApiResponse.Failed("Failed to get user data.");
-
-            return ApiResponse.Success("Rate returned successful", new
+            var getRate = await _context.Rates.OrderByDescending(r => r.CreatedAt).FirstOrDefaultAsync();
+            if(getRate != null)
             {
-                BuyRate = 1750.2,
-                SellRate = 1762.5,
-            });
+                return ApiResponse.Success("Rate returned successful", new RateData
+                {
+                    BuyRate = getRate.BuyRate,
+                    SellRate = getRate.SellRate,
+                });
+            }
+            return ApiResponse.Success("Rate has not been set, contact administrators");
         }
 
         public async Task<ApiResponse> GetTransactionById(string tranId)
@@ -185,6 +183,24 @@ namespace Remitplus_Authentication.Interface
             return ApiResponse.Success("Transaction summary retrieved successfully", summary);
         }
 
+        public async Task<RateData> SetNewSaleRate(RateData rate)
+        {
+             var newRate = new Rates
+             {
+                 RateId = Guid.NewGuid(),
+                 BuyRate = rate.BuyRate,
+                 SellRate = rate.SellRate,
+                 CreatedAt = DateTime.UtcNow
+             };
 
+            _context.Rates.Add(newRate);
+            await _context.SaveChangesAsync();
+
+            return new RateData
+            {
+                BuyRate = newRate.BuyRate,
+                SellRate = newRate.SellRate
+            };
+        }
     }
 }

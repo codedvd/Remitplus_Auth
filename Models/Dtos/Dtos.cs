@@ -2,20 +2,8 @@
 
 public class RateData
 {
-    public string? CcY1 { get; set; }
-    public string? CcY2 { get; set; }
-    public decimal BuyRate { get; set; }
-    public decimal SaleRate { get; set; }
-    public decimal MidRate { get; set; }
-    public string? RateDate { get; set; }
-}
-
-public class RateResponse
-{
-    public RateData? Data { get; set; }
-    public int ErrorCode { get; set; }
-    public string? Message { get; set; }
-    public bool Success { get; set; }
+       public decimal BuyRate { get; set; }
+       public decimal SellRate { get; set; }
 }
 
 public class TransactionSummary

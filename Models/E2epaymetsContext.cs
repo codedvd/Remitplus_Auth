@@ -16,6 +16,7 @@ public partial class E2epaymetsContext : DbContext
     }
 
     public virtual DbSet<FailedRequest> FailedRequests { get; set; }
+    public virtual DbSet<Rates> Rates { get; set; }
 
     public virtual DbSet<IpWhitelist> IpWhitelists { get; set; }
 
@@ -33,6 +34,11 @@ public partial class E2epaymetsContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Rates>(entity =>
+        {
+            entity.HasKey(e => e.RateId);
+        });
+
         modelBuilder.Entity<FailedRequest>(entity =>
         {
             entity.HasKey(e => e.FailId);
