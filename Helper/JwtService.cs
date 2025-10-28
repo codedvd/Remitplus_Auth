@@ -9,7 +9,7 @@ namespace Remitplus_Authentication.Helper
 {
     public interface IJwtService
     {
-        string GenerateToken(Guid userId, string fullName);
+        string GenerateToken(Guid userId, string fullName, string Email);
     }
 
     public class JwtService : IJwtService
@@ -21,7 +21,7 @@ namespace Remitplus_Authentication.Helper
             _jwtSettings = jwtSettings.Value;
         }
 
-        public string GenerateToken(Guid userId, string fullName)
+        public string GenerateToken(Guid userId, string fullName, string Email)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -30,6 +30,7 @@ namespace Remitplus_Authentication.Helper
             {
                 new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
                 new Claim(JwtRegisteredClaimNames.UniqueName, fullName),
+                new Claim(JwtRegisteredClaimNames.Email, Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

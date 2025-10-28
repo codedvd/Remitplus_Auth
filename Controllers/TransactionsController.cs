@@ -11,9 +11,9 @@ namespace Remitplus_Authentication.Controllers
         private readonly ITransactionService _transactions = transactions;
 
         [HttpGet("get-rate")]
-        public async Task<IActionResult> GetSaleRates(string email)
+        public async Task<IActionResult> GetSaleRates()
         {
-            return Ok(await _transactions.GetCurrentSaleRates(email));
+            return Ok(await _transactions.GetCurrentSaleRates());
         }
 
         [HttpPost("transaction/get-all-transactions")]

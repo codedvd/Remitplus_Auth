@@ -155,7 +155,7 @@ namespace Remitplus_Authentication.Interface
             user.LastLoginAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
 
-            var token = _jwtService.GenerateToken(user.UserId, user.FullName);
+            var token = _jwtService.GenerateToken(user.UserId, user.FullName, user.Email);
             string? role = await (from r in _context.UserRoles
                            where r.RoleId == user.RoleId
                            select r.RoleName).FirstOrDefaultAsync();

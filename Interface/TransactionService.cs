@@ -10,7 +10,7 @@ namespace Remitplus_Authentication.Interface
     public interface ITransactionService
     {
         Task<ApiResponse> GetAllSystemTransactions(GetTransactionQueryReq queryReq);
-        Task<ApiResponse> GetCurrentSaleRates(string email);
+        Task<ApiResponse> GetCurrentSaleRates();
         Task<ApiResponse> GetTransactionById(string tranId);
         Task<ApiResponse> GetTransactionsByUserId(Guid userId, GetTransactionQueryReq queryReq);
         Task<ApiResponse> GetTransactionSummary(Guid userId);
@@ -20,7 +20,7 @@ namespace Remitplus_Authentication.Interface
     {
         private readonly E2epaymetsContext _context = context;
         private readonly IRestClient _apiCall = apiCall;
-        private readonly IConfiguration _configuration = configuration;
+        private readonly IConfiguration _config = configuration;
         private readonly IEncryptionHandler _encrypt = encrypt;
 
         public async Task<ApiResponse> GetAllSystemTransactions(GetTransactionQueryReq queryReq)
@@ -70,8 +70,10 @@ namespace Remitplus_Authentication.Interface
             return ApiResponse.Success("Transactions retrieved successfully", transactions);
         }
 
-        public async Task<ApiResponse> GetCurrentSaleRates(string email)
+        public async Task<ApiResponse> GetCurrentSaleRates()
         {
+            var userId = _config["email"]?.ToString();
+
             var getUser = await (from u in _context.Users
                                  join k in _context.UserApiKeys on u.UserId equals k.ApplicationUserId
                                  select k).FirstOrDefaultAsync();
@@ -80,7 +82,7 @@ namespace Remitplus_Authentication.Interface
             var key = _encrypt.AESDecryptData(getUser.ApiKeyHash);
 
             var makeRequest = _apiCall.MakeApiCallAsync(
-                url: $"{_configuration["BaseUrl"]}api/v1/Payments/getFTRate",
+                url: $"{_config["BaseUrl"]}api/v1/Payments/getFTRate",
                 method: HttpMethod.Get,
                 headers: new Dictionary<string, string>
                 {
